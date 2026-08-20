@@ -494,10 +494,14 @@ section.panel {
           <input type="file" id="bom-input" accept=".xlsx,.xlsm,.xls,.csv" multiple>
           <span class="upload-icon">📋</span>
           <div class="upload-label">BOM Excel File(s)</div>
-          <div class="upload-sub">Drag &amp; drop one or many files · .xlsx · .xlsm · .xls</div>
+          <div class="upload-sub">Drag &amp; drop one or many DOC-11317</div>
           <div class="upload-required">REQUIRED</div>
           <button type="button" class="upload-browse-btn" onclick="document.getElementById('bom-input').click()">Browse file(s)…</button>
           <div class="upload-file-name" id="bom-file-name"></div>
+          <a href="./reference/DOC-11317_rev2_Product_BOM.xlsx" download
+             style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--accent2);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:8px 14px;background:var(--bg3);margin-top:12px;">
+            ⬇ Download reference BOM template (DOC-11317)
+          </a>
         </div>
       </div>
 
@@ -523,18 +527,6 @@ section.panel {
       </div>
 
     </div>
-  </section>
-
-  <!-- FIELD CONFIG -->
-  <section class="panel">
-    <div class="panel-title">02 Screening Fields</div>
-    <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">
-      This tool can only screen DoC-11317.
-    </p>
-    <a href="./reference/DOC-11317_rev2_Product_BOM.xlsx" download
-       style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--accent2);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:8px 14px;background:var(--bg3);">
-      ⬇ Download reference BOM template (DOC-11317)
-    </a>
   </section>
 
   <!-- RUN -->
