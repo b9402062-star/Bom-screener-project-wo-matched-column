@@ -1,0 +1,48 @@
+name: Refresh Company Review List
+
+# Runs completely unattended - no person needs to trigger this. GitHub's own
+# scheduler fires it daily; it can also be run on demand from the Actions
+# tab (workflow_dispatch) for an immediate pull if a new sanctions action drops.
+on:
+  schedule:
+    - cron: '0 6 * * *'   # every day at 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install beautifulsoup4
+
+      - name: Run refresh
+        run: python refresh_lists.py
+
+      - name: Commit updated data if changed
+        run: |
+          git config user.name "restricted-party-list-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/company_list.json data/refresh_log.json
+          if git diff --cached --quiet; then
+            echo "No data changes this run."
+          else
+            git commit -m "Automated refresh: $(date -u +%Y-%m-%d)"
+            git push
+          fi
+
+      - name: Upload run log as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: refresh-log
+          path: data/refresh_log.json
