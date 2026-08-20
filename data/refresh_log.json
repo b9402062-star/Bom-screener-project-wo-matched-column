@@ -1,0 +1,13 @@
+{
+  "run_started": "2026-08-10T17:55:35Z",
+  "info": [
+    "UFLPA Entity List: OK (205 rows)",
+    "FCC Covered List: OK (11 rows)",
+    "EU Sanctioned Entities: OK (1772 rows)",
+    "OFAC (Consolidated Screening List): OK (10209 rows)"
+  ],
+  "warnings": [],
+  "errors": [],
+  "run_finished": "2026-08-10T17:56:03Z",
+  "total_rows": 12197
+}

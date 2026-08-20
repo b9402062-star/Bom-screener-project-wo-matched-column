@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOM Restricted Party Screener v1.0.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg: #0d1b2a;
+  --bg2: #162336;
+  --bg3: #1e304a;
+  --border: #2a4060;
+  --accent: #f59e0b;
+  --accent2: #fbbf24;
+  --text: #e8f0fe;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --danger: #ef4444;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+  --status-block: #b91c1c;
+  --status-block-bg: #fef2f2;
+  --status-likely: #9a3412;
+  --status-likely-bg: #fff7ed;
+  --status-clear: #166534;
+  --status-clear-bg: #f0fdf4;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+/* ── HEADER ── */
+header {
+  background: linear-gradient(135deg, #0a1628 0%, #1a2f50 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 32px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.header-title h1 {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.header-title p {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 4px;
+  font-style: italic;
+}
+.header-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  padding: 4px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* ── MAIN LAYOUT ── */
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 32px 64px;
+}
+
+section.panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.panel-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.panel-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── UPLOAD GRID ── */
+.upload-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 700px) { .upload-grid { grid-template-columns: 1fr; } }
+
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: 6px;
+  padding: 24px 20px;
+  text-align: center;
+  transition: all 0.2s;
+  position: relative;
+  background: var(--bg3);
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--accent);
+  background: #1a2f50;
+}
+.upload-zone input[type=file] {
+  display: none;
+}
+.upload-browse-btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.upload-browse-btn:hover { border-color: var(--accent); background: #1a2f50; }
+.upload-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+  display: block;
+}
+.upload-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.upload-sub {
+  font-size: 11px;
+  color: var(--text2);
+}
+.upload-required {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  margin-top: 4px;
+}
+.upload-file-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #34d399;
+  margin-top: 8px;
+  word-break: break-all;
+}
+
+.source-note {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text2);
+}
+.source-note a {
+  color: var(--accent2);
+  text-decoration: none;
+}
+.source-note a:hover { text-decoration: underline; }
+
+/* ── FIELD CONFIG ── */
+
+/* ── BUTTONS ── */
+.btn-run {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: #0d1b2a;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 20px;
+}
+.btn-run:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-run:disabled {
+  background: var(--border);
+  color: var(--text3);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-download:hover { background: #1a2f50; }
+
+/* ── PROGRESS ── */
+.progress-wrap {
+  display: none;
+  margin-bottom: 20px;
+}
+.progress-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+.progress-bar {
+  height: 4px;
+  background: var(--bg3);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 4px;
+  width: 0%;
+  transition: width 0.3s;
+}
+
+/* ── SUMMARY CARDS ── */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  text-align: center;
+}
+.card-number {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.card-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text2);
+  margin-top: 4px;
+}
+.card.block .card-number { color: #f87171; }
+.card.likely .card-number { color: #fb923c; }
+.card.clear .card-number { color: #34d399; }
+.card.total .card-number { color: var(--text); }
+
+/* ── TABS ── */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
+}
+.tab-btn {
+  padding: 10px 18px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text2);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ── TABLE ── */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0 0 6px 6px;
+  max-height: 480px;
+  overflow-y: auto;
+}
+.table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 11px;
+  min-width: 900px;
+}
+.table-wrap thead th {
+  background: var(--bg3);
+  padding: 9px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text2);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 10px;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: 1px solid var(--border);
+}
+.table-wrap tbody tr {
+  border-bottom: 1px solid #1e304a;
+  transition: background 0.15s;
+}
+.table-wrap tbody tr:hover { background: #1a2f50; }
+.table-wrap tbody td {
+  padding: 8px 12px;
+  color: var(--text);
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.status-block   { background: #fef2f2; color: #b91c1c; }
+.status-likely  { background: #fff7ed; color: #9a3412; }
+.status-clear   { background: #f0fdf4; color: #166534; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--text3);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+/* ── HIDDEN ── */
+.hidden { display: none !important; }
+
+/* ── FLASH ── */
+.flash {
+  padding: 12px 16px;
+  border-radius: 6px;
+  background: #1a0f0f;
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  font-size: 12px;
+  margin-bottom: 16px;
+  font-family: var(--mono);
+}
+
+/* ── TABLE COUNT PILL ── */
+.count-pill {
+  display: inline-block;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text2);
+  padding: 1px 7px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* ── RESULT HEADER ROW ── */
+.result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+
+/* ── BUILT-IN COMPANY LIST CARD ── */
+.built-in-card {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px;
+  background: var(--bg3);
+  text-align: center;
+}
+.built-in-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+.built-in-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+.built-in-meta { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
+.built-in-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 10px;
+}
+.built-in-badge.uflpa { background: #78350f22; color: #fbbf24; border: 1px solid #78350f55; }
+.built-in-badge.fcc   { background: #1e3a5f44; color: #60a5fa; border: 1px solid #1e3a5f99; }
+.built-in-badge.eu    { background: #14532d33; color: #34d399; border: 1px solid #14532d66; }
+.built-in-badge.ofac  { background: #4c1d9522; color: #c4b5fd; border: 1px solid #4c1d9555; }
+.built-in-sub { font-size: 11px; color: var(--text2); margin-bottom: 14px; }
+.btn-download-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-download-list:hover { background: #1a2f50; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <h1>BOM Restricted Party Screener</h1>
+  </div>
+  <div class="header-badge">v1.0.0 · Auto-refreshed data</div>
+</header>
+
+<main>
+  <div id="flash-area"></div>
+
+  <!-- UPLOAD -->
+  <section class="panel">
+    <div class="panel-title">01 Upload Files</div>
+    <div class="upload-grid">
+
+      <div>
+        <div class="upload-zone" id="bom-zone">
+          <input type="file" id="bom-input" accept=".xlsx,.xlsm,.xls,.csv" multiple>
+          <span class="upload-icon">📋</span>
+          <div class="upload-label">BOM Excel File(s)</div>
+          <div class="upload-sub">Drag &amp; drop one or many files · .xlsx · .xlsm · .xls</div>
+          <div class="upload-required">REQUIRED</div>
+          <button type="button" class="upload-browse-btn" onclick="document.getElementById('bom-input').click()">Browse file(s)…</button>
+          <div class="upload-file-name" id="bom-file-name"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="built-in-card">
+          <div class="built-in-icon">🏢</div>
+          <div class="built-in-title">Company Review List</div>
+          <div class="built-in-meta" id="built-in-meta">
+            <span class="built-in-badge" id="data-loading-badge">Loading current data&hellip;</span>
+          </div>
+          <div class="built-in-sub" id="built-in-sub">Fetching latest restricted-party data&hellip;</div>
+          <button class="btn-download-list" id="download-list-btn" disabled>⬇ Download for Review</button>
+        </div>
+        <div class="source-note">
+          Sources: <a href="https://www.dhs.gov/uflpa-entity-list" target="_blank">DHS UFLPA</a> ·
+          <a href="https://www.fcc.gov/supplychain/coveredlist" target="_blank">FCC Covered List</a> ·
+          <a href="https://data.europa.eu/apps/eusanctionstracker/entities/" target="_blank">EU Sanctions Tracker</a> ·
+          <a href="https://sanctionslist.ofac.treas.gov/Home/SdnList" target="_blank">OFAC Sanctions Lists</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FIELD CONFIG -->
+  <section class="panel">
+    <div class="panel-title">02 Screening Fields</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">
+      This tool screens the exact column heading <strong style="color:var(--accent);">"Manufacturer Name"</strong> only.
+      Every uploaded BOM must contain a column with this exact header.
+    </p>
+    <a href="./reference/DOC-11317_rev2_Product_BOM.xlsx" download
+       style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--accent2);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:8px 14px;background:var(--bg3);">
+      ⬇ Download reference BOM template (DOC-11317)
+    </a>
+  </section>
+
+  <!-- RUN -->
+  <div class="progress-wrap" id="progress-wrap">
+    <div class="progress-label" id="progress-label">Processing…</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+
+  <button class="btn-run" id="run-btn">▶ Run Screening (all uploaded BOMs)</button>
+
+  <!-- RESULTS -->
+  <div id="results-section" class="hidden">
+
+    <div id="column-error-banner" style="display:none; margin-bottom:16px; padding:14px 18px; border:1px solid #b91c1c; background:#7f1d1d33; border-radius:8px; color:#fca5a5; font-size:13px;"></div>
+
+    <div class="summary-cards" id="summary-cards"></div>
+
+    <section class="panel" style="padding:0; overflow:hidden;">
+      <div class="tabs" id="tabs">
+        <button class="tab-btn active" data-tab="tab-block">Block / Escalate <span class="count-pill" id="pill-block">0</span></button>
+        <button class="tab-btn" data-tab="tab-likely">Likely Match <span class="count-pill" id="pill-likely">0</span></button>
+        <button class="tab-btn" data-tab="tab-all">All Results <span class="count-pill" id="pill-all">0</span></button>
+      </div>
+
+      <div style="padding:16px 20px 4px; display:flex; justify-content:flex-end;">
+        <button class="btn-download" id="download-btn">⬇ Download Excel Report</button>
+      </div>
+
+      <div id="tab-block" class="tab-pane active" style="padding:0 20px 20px;">
+        <div class="table-wrap"><table id="tbl-block"><thead></thead><tbody></tbody></table></div>
+      </div>
+      <div id="tab-likely" class="tab-pane" style="padding:0 20px 20px;">
+        <div class="table-wrap"><table id="tbl-likely"><thead></thead><tbody></tbody></table></div>
+      </div>
+      <div id="tab-all" class="tab-pane" style="padding:0 20px 20px;">
+        <div class="table-wrap"><table id="tbl-all"><thead></thead><tbody></tbody></table></div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+// ════════════════════════════════════════════
+// EMBEDDED COMPANY REVIEW LIST (built-in, refreshed 2026-08-10)
+// Sources: DHS UFLPA, FCC Covered List, EU Sanctions Tracker
+// ════════════════════════════════════════════
+let BUILT_IN_COMPANY_LIST = []; // populated at runtime by loadCompanyList() below
+
+// ════════════════════════════════════════════
+// DYNAMIC DATA LOADING
+// Company Review List data is no longer embedded in this file. It's fetched
+// from ./data/company_list.json at load time, which an unattended scheduled
+// job (see refresh_lists.py / .github/workflows/refresh.yml in the project
+// this file ships with) keeps current with no person needing to touch it.
+// This file must be served over http(s) (e.g. GitHub Pages, an intranet
+// server) alongside its data/ folder - opening it directly via file:// will
+// generally be blocked by the browser's local-file fetch restrictions.
+// ════════════════════════════════════════════
+const COMPANY_LIST_URL = './data/company_list.json';
+const REFRESH_LOG_URL = './data/refresh_log.json';
+
+const BADGE_GROUPS = [
+  { match: s => s === 'UFLPA Entity List', label: 'UFLPA', cls: 'uflpa' },
+  { match: s => s === 'FCC Covered List', label: 'FCC', cls: 'fcc' },
+  { match: s => s === 'EU Sanctioned Entities', label: 'EU Sanctions', cls: 'eu' },
+  { match: s => s.startsWith('OFAC'), label: 'OFAC', cls: 'ofac' },
+];
+
+function renderCompanyListBadges(rows) {
+  const counts = new Map();
+  rows.forEach(r => {
+    const src = r['Source List'] || 'Unspecified';
+    counts.set(src, (counts.get(src) || 0) + 1);
+  });
+
+  const groupTotals = new Map();
+  for (const [src, n] of counts) {
+    const group = BADGE_GROUPS.find(g => g.match(src)) || { label: src, cls: 'uflpa' };
+    groupTotals.set(group.label, { n: (groupTotals.get(group.label)?.n || 0) + n, cls: group.cls });
+  }
+
+  const metaEl = document.getElementById('built-in-meta');
+  metaEl.innerHTML = '';
+  for (const [label, { n, cls }] of groupTotals) {
+    const span = document.createElement('span');
+    span.className = 'built-in-badge ' + cls;
+    span.textContent = `${label} · ${n.toLocaleString()}`;
+    metaEl.appendChild(span);
+  }
+
+  document.getElementById('built-in-sub').textContent =
+    `${rows.length.toLocaleString()} entities · Auto-refreshed`;
+}
+
+async function loadCompanyList() {
+  const runBtn = document.getElementById('run-btn');
+  const downloadListBtn = document.getElementById('download-list-btn');
+  try {
+    const [dataResp, logResp] = await Promise.all([
+      fetch(COMPANY_LIST_URL),
+      fetch(REFRESH_LOG_URL).catch(() => null),
+    ]);
+    if (!dataResp.ok) throw new Error(`HTTP ${dataResp.status} fetching ${COMPANY_LIST_URL}`);
+    const rows = await dataResp.json();
+    if (!Array.isArray(rows) || rows.length === 0) throw new Error('company_list.json was empty or malformed');
+
+    BUILT_IN_COMPANY_LIST = rows;
+    renderCompanyListBadges(rows);
+    downloadListBtn.disabled = false;
+    runBtn.disabled = false;
+
+    if (logResp && logResp.ok) {
+      try {
+        const log = await logResp.json();
+        if (log.run_finished) {
+          const sub = document.getElementById('built-in-sub');
+          sub.textContent += ` · Last refresh: ${log.run_finished.slice(0, 10)}`;
+          if (log.warnings && log.warnings.length) {
+            sub.title = 'Some sources fell back to previous data on the last refresh:\n' + log.warnings.join('\n');
+          }
+        }
+      } catch (e) { /* refresh log is informational only; ignore parse errors */ }
+    }
+  } catch (err) {
+    console.error('Failed to load company_list.json:', err);
+    document.getElementById('built-in-meta').innerHTML =
+      '<span class="built-in-badge" style="color:#f87171;border-color:#f8717155;background:#f8717122;">Data failed to load</span>';
+    document.getElementById('built-in-sub').innerHTML =
+      'Could not fetch <code>./data/company_list.json</code>. This file must be served over ' +
+      'http(s) alongside its data/ folder (e.g. GitHub Pages) - opening it directly from disk ' +
+      'will not work.';
+    showFlash('Company Review List failed to load - screening is unavailable until this is fixed. See the note under "Company Review List" above.');
+  }
+}
+document.getElementById('run-btn').disabled = true;
+loadCompanyList();
+
+// ════════════════════════════════════════════
+// CONSTANTS
+// ════════════════════════════════════════════
+const TOOL_VERSION = '1.0.0';
+
+const SUFFIX_PHRASES = [
+  'SDN BHD','PTE LTD','PTY LTD','K K','LTD','LIMITED','CO','COMPANY','CORP','CORPORATION',
+  'INC','INCORPORATED','LLC','LLP','PLC','GMBH','AG','SA','SAS','BV','NV','KK','PTY','PTE',
+  'BHD','HOLDINGS','HOLDING','GROUP','TECHNOLOGY','TECHNOLOGIES','ELECTRONICS','INDUSTRIAL',
+  'INDUSTRIES','MANUFACTURING','FACTORY','TRADING','INTERNATIONAL'
+];
+
+const CHINESE_SUFFIXES = [
+  '股份有限公司','有限公司','集团','公司','科技','电子','實業','实业','制造','製造',
+  '工厂','工廠','貿易','贸易','國際','国际'
+];
+
+const REQUIRED_SCREENING_FIELD = 'Manufacturer Name';
+
+const COMPANY_LIST_COLUMNS = [
+  'Source List','Entity Name','Normalized Entity Name','Alias / Known Name','Normalized Alias',
+  'Entity Type','Country / Region','Address','Parent / Affiliate / Subsidiary Notes',
+  'Product / Service Scope','Date Added','Source URL','Source Record ID',
+  'Source Last Checked','Active?','Reviewer Status','Reviewer','Reviewer Date','Reviewer Notes'
+];
+
+const REVIEW_COLS = [
+  'BOM File','BOM Row Number','BOM Field','BOM Raw Company Name','BOM Normalized Company Name',
+  'Screening Status','Match Type','Match Score','Source List','Matched Entity Name',
+  'Matched Alias','Country / Region','Address','Product / Service Scope',
+  'Parent / Affiliate / Subsidiary Notes','Source URL','Source Record ID',
+  'Reviewer Decision','Reviewer','Reviewer Date','Reviewer Notes'
+];
+
+const ALL_COLS = [...REVIEW_COLS, 'Notes', 'BOM Excel Row Number'];
+
+// ════════════════════════════════════════════
+// NORMALIZATION (port of normalization.py)
+// ════════════════════════════════════════════
+function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+function stripPunctSymbols(text) {
+  // Replace Unicode punctuation & symbol chars with space
+  return text.replace(/[\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A1-\u00BF\u2000-\u206F\u2070-\u209F\u20A0-\u20CF\u2100-\u214F\u2190-\u21FF\u2200-\u22FF\u2300-\u23FF\u25A0-\u25FF\u2600-\u27BF\uFE30-\uFE4F\uFF00-\uFFEF]/g, ' ');
+}
+
+function collapseSpaces(text) { return text.replace(/\s+/g, ' ').trim(); }
+
+function removeChineseSuffixes(text) {
+  let cur = text, changed = true;
+  const sorted = [...CHINESE_SUFFIXES].sort((a,b) => b.length - a.length);
+  while (changed) {
+    changed = false;
+    for (const suf of sorted) {
+      const re = new RegExp(`\\s*${escapeRegex(suf)}$`);
+      const cand = cur.replace(re, '').trim();
+      if (cand && cand !== cur) { cur = collapseSpaces(cand); changed = true; break; }
+    }
+  }
+  return cur;
+}
+
+function removeLatinSuffixes(text) {
+  let tokens = text.split(/\s+/).filter(Boolean);
+  if (!tokens.length) return text;
+  const phrases = SUFFIX_PHRASES.map(p => p.split(/\s+/));
+  phrases.sort((a,b) => b.length - a.length);
+  let changed = true;
+  while (tokens.length && changed) {
+    changed = false;
+    for (const ph of phrases) {
+      if (tokens.length <= ph.length) continue;
+      const tail = tokens.slice(tokens.length - ph.length);
+      if (tail.every((t,i) => t === ph[i])) {
+        tokens = tokens.slice(0, tokens.length - ph.length);
+        changed = true; break;
+      }
+    }
+  }
+  return tokens.length ? tokens.join(' ') : text;
+}
+
+function normalizeCompanyName(name) {
+  if (name === null || name === undefined) return '';
+  let text = String(name).normalize('NFKC').toUpperCase().trim();
+  if (!text) return '';
+  text = text.replace(/&/g, ' AND ');
+  text = stripPunctSymbols(text);
+  text = collapseSpaces(text);
+  if (!text) return '';
+  const before = text;
+  text = removeChineseSuffixes(text);
+  text = removeLatinSuffixes(text);
+  text = collapseSpaces(text);
+  return text || before;
+}
+
+// ════════════════════════════════════════════
+// FUZZY MATCHING (port of RapidFuzz algorithms)
+// ════════════════════════════════════════════
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  // Use two-row approach for memory efficiency
+  let prev = new Uint32Array(n + 1);
+  let curr = new Uint32Array(n + 1);
+  for (let j = 0; j <= n; j++) prev[j] = j;
+  for (let i = 1; i <= m; i++) {
+    curr[0] = i;
+    for (let j = 1; j <= n; j++) {
+      curr[j] = a[i-1] === b[j-1]
+        ? prev[j-1]
+        : 1 + Math.min(prev[j], curr[j-1], prev[j-1]);
+    }
+    [prev, curr] = [curr, prev];
+  }
+  return prev[n];
+}
+
+function ratio(a, b) {
+  if (!a && !b) return 100;
+  if (!a || !b) return 0;
+  const lenSum = a.length + b.length;
+  const dist = levenshtein(a, b);
+  return Math.round(100 * (lenSum - dist) / lenSum);
+}
+
+function tokenSortRatio(a, b) {
+  const sa = a.split(/\s+/).sort().join(' ');
+  const sb = b.split(/\s+/).sort().join(' ');
+  return ratio(sa, sb);
+}
+
+function tokenSetRatio(a, b) {
+  const ta = new Set(a.split(/\s+/).filter(Boolean));
+  const tb = new Set(b.split(/\s+/).filter(Boolean));
+  const inter = [...ta].filter(t => tb.has(t)).sort();
+  const da = [...ta].filter(t => !tb.has(t)).sort();
+  const db = [...tb].filter(t => !ta.has(t)).sort();
+  const s0 = inter.join(' ');
+  const s1 = [...inter, ...da].join(' ');
+  const s2 = [...inter, ...db].join(' ');
+  return Math.max(ratio(s0, s1), ratio(s0, s2), ratio(s1, s2));
+}
+
+function wRatio(a, b) {
+  if (!a || !b) return 0;
+  // Quick length filter: if length difference too extreme, skip heavy computation
+  const diff = Math.abs(a.length - b.length);
+  const total = a.length + b.length;
+  if (total > 0 && diff / total > 0.85) return 0;
+  return Math.max(ratio(a, b), tokenSortRatio(a, b), tokenSetRatio(a, b));
+}
+
+// Score threshold: can we possibly score >= minScore given lengths?
+function canScore(a, b, minScore) {
+  if (!a || !b) return false;
+  const total = a.length + b.length;
+  const maxDist = Math.floor(total * (1 - minScore / 100));
+  return Math.abs(a.length - b.length) <= maxDist;
+}
+
+// ════════════════════════════════════════════
+// MATCHING ENGINE (port of matching.py)
+// ════════════════════════════════════════════
+function cleanCell(v) {
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'number' && isNaN(v)) return '';
+  return String(v).trim();
+}
+
+function canonicalHeader(v) { return String(v).toUpperCase().replace(/[^A-Z0-9]+/g, ''); }
+
+function splitAliases(v) {
+  const text = cleanCell(v);
+  if (!text) return [];
+  return text.split(/[;,|/\n\r]+/).map(s => s.trim()).filter(Boolean);
+}
+
+function activeValueIsActive(v) {
+  const text = cleanCell(v).toUpperCase();
+  if (!text) return true;
+  return !['N','NO','FALSE','0','INACTIVE','REMOVED','DELISTED'].includes(text);
+}
+
+function detectScreeningFields(bomRows, requestedFields) {
+  if (!bomRows.length) return { selected: [], warnings: [] };
+  const headers = Object.keys(bomRows[0]);
+  const headerMap = {};
+  headers.forEach(h => { headerMap[canonicalHeader(h)] = h; });
+  const warnings = [];
+
+  if (!requestedFields || !requestedFields.length) {
+    return { selected: [], warnings: ['No screening fields specified. Select or type at least one BOM column name to screen.'] };
+  }
+
+  const selected = [];
+  for (const f of requestedFields) {
+    const ft = f.trim();
+    if (!ft) continue;
+    if (headers.includes(ft)) { selected.push(ft); continue; }
+    const matched = headerMap[canonicalHeader(ft)];
+    if (matched) { selected.push(matched); }
+    else { warnings.push(`Specified field '${ft}' not found in BOM.`); }
+  }
+  return { selected: [...new Set(selected)], warnings };
+}
+
+function prepareCandidates(companyRows) {
+  const candidates = [];
+
+  for (let idx = 0; idx < companyRows.length; idx++) {
+    const row = companyRows[idx];
+    const excelRow = idx + 2;
+    const sourceList = cleanCell(row['Source List']);
+    const sourceUrl = cleanCell(row['Source URL']);
+    const entityName = cleanCell(row['Entity Name']);
+    const aliasCel = cleanCell(row['Alias / Known Name']);
+    const normEntity = cleanCell(row['Normalized Entity Name']) || normalizeCompanyName(entityName);
+
+    if (!activeValueIsActive(row['Active?'])) continue;
+
+    const common = {
+      sourceList, entityName, normEntityName: normEntity,
+      entityType: cleanCell(row['Entity Type']),
+      countryRegion: cleanCell(row['Country / Region']),
+      address: cleanCell(row['Address']),
+      parentNotes: cleanCell(row['Parent / Affiliate / Subsidiary Notes']),
+      productScope: cleanCell(row['Product / Service Scope']),
+      sourceUrl, sourceRecordId: cleanCell(row['Source Record ID']),
+    };
+
+    if (normEntity) {
+      candidates.push({ ...common, alias:'', normAlias:'', candidateName:entityName, candidateNorm:normEntity, kind:'Entity' });
+    }
+
+    const rawAliases = splitAliases(aliasCel);
+    const normAliasCell = splitAliases(row['Normalized Alias'] || '');
+    const aliasPairs = (normAliasCell.length >= rawAliases.length && rawAliases.length > 0)
+      ? rawAliases.map((a,i) => [a, normAliasCell[i] || normalizeCompanyName(a)])
+      : rawAliases.map(a => [a, normalizeCompanyName(a)]);
+
+    for (const [alias, normAlias] of aliasPairs) {
+      const na = normalizeCompanyName(normAlias);
+      if (!na) continue;
+      candidates.push({ ...common, alias, normAlias:na, candidateName:alias, candidateNorm:na, kind:'Alias' });
+    }
+  }
+  return { candidates };
+}
+
+function candidateToFields(c) {
+  if (!c) return { 'Source List':'','Matched Entity Name':'','Matched Alias':'','Country / Region':'',
+    'Address':'','Product / Service Scope':'','Parent / Affiliate / Subsidiary Notes':'','Source URL':'','Source Record ID':'' };
+  return { 'Source List':c.sourceList, 'Matched Entity Name':c.entityName,
+    'Matched Alias': c.kind === 'Alias' ? c.alias : '',
+    'Country / Region':c.countryRegion, 'Address':c.address,
+    'Product / Service Scope':c.productScope,
+    'Parent / Affiliate / Subsidiary Notes':c.parentNotes,
+    'Source URL':c.sourceUrl, 'Source Record ID':c.sourceRecordId };
+}
+
+function baseResult(bomRow, bomExcelRow, bomField, rawVal, normVal, status, matchType, matchScore, candidate=null, notes='') {
+  return {
+    'BOM Row Number':bomRow, 'BOM Field':bomField,
+    'BOM Raw Company Name':cleanCell(rawVal), 'BOM Normalized Company Name':normVal,
+    'Screening Status':status, 'Match Type':matchType,
+    'Match Score': matchScore === null ? '' : Math.round(matchScore * 100) / 100,
+    ...candidateToFields(candidate),
+    'Reviewer Decision':'','Reviewer':'','Reviewer Date':'','Reviewer Notes':'',
+    'Notes':notes, 'BOM Excel Row Number':bomExcelRow
+  };
+}
+
+function bestFuzzyCandidate(normVal, candidates) {
+  let best = null, bestScore = 0;
+  for (const c of candidates) {
+    if (!c.candidateNorm) continue;
+    if (!canScore(normVal, c.candidateNorm, 90)) continue;
+    const score = Math.max(tokenSetRatio(normVal, c.candidateNorm), wRatio(normVal, c.candidateNorm));
+    if (score > bestScore) { bestScore = score; best = c; }
+  }
+  return { best, score: bestScore };
+}
+
+function screenValue(rawVal, candidates, bomRow, bomExcelRow, bomField) {
+  const normVal = normalizeCompanyName(rawVal);
+
+  const exactEntity = candidates.find(c => c.kind === 'Entity' && c.candidateNorm === normVal);
+  if (exactEntity) {
+    return baseResult(bomRow,bomExcelRow,bomField,rawVal,normVal,'Block / Escalate','Exact',100,exactEntity,'');
+  }
+
+  const exactAlias = candidates.find(c => c.kind === 'Alias' && c.candidateNorm === normVal);
+  if (exactAlias) {
+    return baseResult(bomRow,bomExcelRow,bomField,rawVal,normVal,'Block / Escalate','Exact',100,exactAlias,'');
+  }
+
+  const { best, score } = bestFuzzyCandidate(normVal, candidates);
+  let status, matchType;
+  if (score >= 90) { status = 'Likely Match'; matchType = 'Partial'; }
+  else { status = 'Clear'; matchType = best ? 'Partial' : ''; }
+
+  return baseResult(bomRow,bomExcelRow,bomField,rawVal,normVal,status,matchType,best?score:null,best,'');
+}
+
+// ════════════════════════════════════════════
+// MAIN SCREENING ORCHESTRATOR
+// ════════════════════════════════════════════
+let lastRunData = null;
+
+async function runScreening(bomRows, companyRows, requestedFields) {
+  const runDatetime = new Date().toISOString();
+  const { selected: selectedFields, warnings: fieldWarnings } = detectScreeningFields(bomRows, requestedFields);
+  const { candidates } = prepareCandidates(companyRows);
+  if (!candidates.length) {
+    fieldWarnings.push('No active usable company records were available for matching - the Company Review List may be empty or all rows are marked inactive.');
+  }
+
+  const allResults = [];
+
+  const total = bomRows.length * Math.max(selectedFields.length, 1);
+  let processed = 0;
+  const BATCH = 50;
+
+  for (let i = 0; i < bomRows.length; i++) {
+    const row = bomRows[i];
+    const bomRow = i + 1;
+    const bomExcelRow = i + 2;
+    for (const field of selectedFields) {
+      const result = screenValue(row[field], candidates, bomRow, bomExcelRow, field);
+      allResults.push(result);
+      processed++;
+    }
+    // Yield to UI every BATCH rows
+    if (i % BATCH === 0) {
+      setProgress(30 + Math.round(65 * processed / Math.max(total,1)), `Screening row ${i+1} / ${bomRows.length}…`);
+      await new Promise(r => setTimeout(r, 0));
+    }
+  }
+
+  const blockQueue = allResults.filter(r => r['Screening Status'] === 'Block / Escalate');
+  const likelyQueue = allResults.filter(r => r['Screening Status'] === 'Likely Match');
+
+  const statusCounts = {};
+  for (const r of allResults) {
+    statusCounts[r['Screening Status']] = (statusCounts[r['Screening Status']] || 0) + 1;
+  }
+  const matchCounts = {};
+  for (const r of allResults) {
+    if (r['Match Type']) matchCounts[r['Match Type']] = (matchCounts[r['Match Type']]||0)+1;
+  }
+
+  const summary = {
+    'Run Date/Time': runDatetime,
+    'BOM File': 'uploaded_bom.xlsx',
+    'Company Review List File': 'uploaded_company_review_list.xlsx',
+    'Total BOM Rows': bomRows.length,
+    'Screening Fields Used': selectedFields.join(', '),
+    'Total Screened Values': allResults.length,
+    'Exact Matches': matchCounts['Exact'] || 0,
+    'Partial Matches': matchCounts['Partial'] || 0,
+    'Likely Matches': statusCounts['Likely Match'] || 0,
+    'Clear Items': statusCounts['Clear'] || 0,
+    'Tool Version': TOOL_VERSION
+  };
+
+  return { summary, blockQueue, likelyQueue, allResults, companyRows, bomRows, statusCounts, selectedFields, fieldWarnings };
+}
+
+// ════════════════════════════════════════════
+// EXCEL EXPORT
+// ════════════════════════════════════════════
+function statusFill(status) {
+  const map = {
+    'Block / Escalate': 'FFC7CE',
+    'Likely Match': 'F4B183',
+    'Clear': 'C6EFCE'
+  };
+  return map[status] || null;
+}
+
+function applyFillsToSheet(ws, data, statusColName) {
+  // Find status column index
+  if (!data.length) return;
+  const headers = Object.keys(data[0]);
+  const sIdx = headers.indexOf(statusColName);
+  if (sIdx < 0) return;
+  const sColLetter = String.fromCharCode(65 + sIdx);
+
+  data.forEach((row, ri) => {
+    const status = row[statusColName];
+    const fill = statusFill(status);
+    if (!fill) return;
+    const cellAddr = `${sColLetter}${ri + 2}`;
+    if (ws[cellAddr]) {
+      ws[cellAddr].s = { fill: { patternType:'solid', fgColor:{ rgb: fill } } };
+    }
+  });
+}
+
+function downloadExcel(data) {
+  const wb = XLSX.utils.book_new();
+
+  function addSheet(name, rows) {
+    const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{}]);
+    XLSX.utils.book_append_sheet(wb, ws, name.substring(0,31));
+    return ws;
+  }
+
+  addSheet('Run Summary', [data.summary]);
+  const wsBlock = addSheet('Block Escalate', data.blockQueue);
+  applyFillsToSheet(wsBlock, data.blockQueue, 'Screening Status');
+  const wsLikely = addSheet('Likely Match', data.likelyQueue);
+  applyFillsToSheet(wsLikely, data.likelyQueue, 'Screening Status');
+
+  const ts = new Date().toISOString().replace(/[:.]/g,'-').substring(0,19);
+  downloadWorkbook(wb, `screening_report_${ts}.xlsx`);
+}
+
+// ════════════════════════════════════════════
+// UI HELPERS
+// ════════════════════════════════════════════
+function setProgress(pct, label) {
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = label;
+}
+
+function showFlash(msg) {
+  const area = document.getElementById('flash-area');
+  area.innerHTML = `<div class="flash" onclick="this.remove()" style="cursor:pointer;" title="Click to dismiss">${msg} <span style="float:right;opacity:0.6;">✕</span></div>`;
+}
+
+function statusBadge(status) {
+  const cls = {
+    'Block / Escalate': 'status-block',
+    'Likely Match': 'status-likely',
+    'Clear': 'status-clear'
+  }[status] || '';
+  return `<span class="status-badge ${cls}">${status}</span>`;
+}
+
+function renderTable(tableId, rows, cols, limit=500) {
+  const tbl = document.getElementById(tableId);
+  const thead = tbl.querySelector('thead');
+  const tbody = tbl.querySelector('tbody');
+
+  if (!rows.length) {
+    thead.innerHTML = '';
+    tbody.innerHTML = '<tr><td colspan="100" class="empty-state">No records</td></tr>';
+    return;
+  }
+
+  thead.innerHTML = '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
+  const displayed = rows.slice(0, limit);
+  tbody.innerHTML = displayed.map(row => {
+    return '<tr>' + cols.map(col => {
+      const v = row[col] === undefined ? '' : row[col];
+      if (col === 'Screening Status') return `<td>${statusBadge(v)}</td>`;
+      return `<td title="${String(v).replace(/"/g,'&quot;')}">${v}</td>`;
+    }).join('') + '</tr>';
+  }).join('');
+
+  if (rows.length > limit) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = cols.length;
+    td.style.cssText = 'text-align:center;padding:10px;color:var(--text3);font-style:italic;';
+    td.textContent = `Showing ${limit} of ${rows.length} rows. Download Excel for full results.`;
+    tbody.appendChild(tr);
+    tr.appendChild(td);
+  }
+}
+
+function renderSummaryCards(statusCounts, totalRows, totalScreened) {
+  const el = document.getElementById('summary-cards');
+  const cards = [
+    { key:'total', label:'BOM Rows', value:totalRows, cls:'total' },
+    { key:'screened', label:'Screened Values', value:totalScreened, cls:'total' },
+    { key:'Block / Escalate', label:'Block / Escalate', cls:'block' },
+    { key:'Likely Match', label:'Likely Match', cls:'likely' },
+    { key:'Clear', label:'Clear', cls:'clear' },
+  ];
+  el.innerHTML = cards.map(c => {
+    const v = c.key === 'total' ? totalRows : c.key === 'screened' ? totalScreened : (statusCounts[c.key] || 0);
+    return `<div class="card ${c.cls}"><div class="card-number">${v}</div><div class="card-label">${c.label}</div></div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+// FILE READING
+// ════════════════════════════════════════════
+function readExcel(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(new Uint8Array(e.target.result), { type:'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+
+        // Auto-detect the header row — many BOMs have title blocks on row 1
+        // Scan the first 15 rows looking for one that contains known BOM column tokens
+        const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', blankrows: false });
+        const knownTokens = [
+          'manufacturer','supplier','vendor','factory','plant','maker',
+          'mpn','mfr','mfg','part number','partnumber','distributor'
+        ];
+
+        let headerRowIdx = 0;
+        let bestScore = 0;
+        const scanLimit = Math.min(aoa.length, 15);
+        for (let i = 0; i < scanLimit; i++) {
+          const cells = (aoa[i] || []).map(v => String(v || '').toLowerCase());
+          let score = 0;
+          for (const cell of cells) {
+            for (const tok of knownTokens) {
+              if (cell.includes(tok)) { score++; break; }
+            }
+          }
+          if (score > bestScore) { bestScore = score; headerRowIdx = i; }
+        }
+
+        // If we found a better header row below row 1, use sheet_to_json with `range` offset
+        const rows = headerRowIdx === 0
+          ? XLSX.utils.sheet_to_json(ws, { defval: '' })
+          : XLSX.utils.sheet_to_json(ws, { defval: '', range: headerRowIdx });
+
+        // Attach metadata so the caller can inform the user
+        rows.__headerRow = headerRowIdx + 1;     // 1-based Excel row
+        rows.__headerScore = bestScore;
+        resolve(rows);
+      } catch(err) { reject(err); }
+    };
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// ════════════════════════════════════════════
+// APP INIT
+// ════════════════════════════════════════════
+let bomFiles = [];
+
+// File upload handlers
+function makeUploadHandler(inputId, zoneId, nameId) {
+  const input  = document.getElementById(inputId);
+  const zone   = document.getElementById(zoneId);
+  const nameEl = document.getElementById(nameId);
+
+  function setFiles(files) {
+    if (!files || !files.length) return;
+    bomFiles = Array.from(files);
+    nameEl.innerHTML = bomFiles
+      .map(f => `✓ ${f.name} <span style="opacity:0.6;">(${(f.size/1024).toFixed(1)} KB)</span>`)
+      .join('<br>');
+    zone.style.borderColor = '#34d399';
+  }
+
+  // Standard file picker
+  input.addEventListener('change', () => setFiles(input.files));
+
+  // Canonical drag-drop pattern — prevent ALL default browser behaviour on every drag event
+  ['dragenter','dragover','dragleave','drop'].forEach(ev => {
+    zone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }, false);
+  });
+  ['dragenter','dragover'].forEach(ev =>
+    zone.addEventListener(ev, () => zone.classList.add('drag-over'), false)
+  );
+  ['dragleave','drop'].forEach(ev =>
+    zone.addEventListener(ev, () => zone.classList.remove('drag-over'), false)
+  );
+  zone.addEventListener('drop', e => {
+    const dt = e.dataTransfer;
+    if (dt && dt.files && dt.files.length > 0) {
+      setFiles(dt.files);
+    } else {
+      showFlash('Drop did not contain readable files. Try the Browse button.');
+    }
+  }, false);
+
+  // Prevent the browser from navigating away if a file is dropped outside the zone
+  ['dragover','drop'].forEach(ev => {
+    window.addEventListener(ev, e => e.preventDefault(), false);
+  });
+}
+makeUploadHandler('bom-input','bom-zone','bom-file-name');
+
+// Bulletproof XLSX download via Blob URL (avoids browser sandbox issues with XLSX.writeFile)
+function downloadWorkbook(wb, filename) {
+  const arrayBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([arrayBuffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 200);
+}
+
+// Download built-in company list as Excel
+document.getElementById('download-list-btn').addEventListener('click', () => {
+  if (typeof XLSX === 'undefined') {
+    showFlash('Excel library not loaded. Check your internet connection and reload the page.');
+    return;
+  }
+  try {
+    const wb = XLSX.utils.book_new();
+    const COL_WIDTHS = [
+      {wch:22},{wch:42},{wch:36},{wch:48},{wch:42},{wch:12},{wch:18},{wch:20},
+      {wch:32},{wch:42},{wch:14},{wch:44},{wch:20},{wch:22},{wch:10},
+      {wch:18},{wch:16},{wch:14},{wch:44}
+    ];
+
+    // Preferred sheet order + short, Excel-safe display names (<=31 chars, no \/?*[]:)
+    const SOURCE_LIST_SHEET_ORDER = [
+      ['UFLPA Entity List', 'UFLPA Entity List'],
+      ['FCC Covered List', 'FCC Covered List'],
+      ['EU Sanctioned Entities', 'EU Sanctioned Entities'],
+      ['OFAC SDN List', 'OFAC SDN List'],
+      ['OFAC Sectoral Sanctions (SSI) List', 'OFAC SSI List'],
+      ['OFAC Non-SDN Chinese Military-Industrial Complex (CMIC) List', 'OFAC CMIC List'],
+      ['OFAC Non-SDN Menu-Based Sanctions List', 'OFAC Menu-Based Sanctions'],
+      ['OFAC Capta List', 'OFAC Capta List'],
+    ];
+
+    function sanitizeSheetName(name, usedNames) {
+      let clean = String(name).replace(/[\\/?*\[\]:]/g, '-').trim();
+      if (!clean) clean = 'Sheet';
+      if (clean.length > 31) clean = clean.slice(0, 31);
+      let base = clean, n = 2;
+      while (usedNames.has(clean.toUpperCase())) {
+        const suffix = ' (' + n + ')';
+        clean = base.slice(0, 31 - suffix.length) + suffix;
+        n++;
+      }
+      usedNames.add(clean.toUpperCase());
+      return clean;
+    }
+
+    // Group the built-in company list by its Source List value
+    const bySource = new Map();
+    BUILT_IN_COMPANY_LIST.forEach(row => {
+      const key = row['Source List'] || 'Unspecified Source';
+      if (!bySource.has(key)) bySource.set(key, []);
+      bySource.get(key).push(row);
+    });
+
+    const usedNames = new Set();
+    const orderedKeys = [
+      ...SOURCE_LIST_SHEET_ORDER.map(([key]) => key).filter(key => bySource.has(key)),
+      ...[...bySource.keys()].filter(key => !SOURCE_LIST_SHEET_ORDER.some(([k]) => k === key)).sort()
+    ];
+    const displayNameMap = new Map(SOURCE_LIST_SHEET_ORDER);
+
+    orderedKeys.forEach(key => {
+      const rows = bySource.get(key);
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws['!cols'] = COL_WIDTHS;
+      const sheetName = sanitizeSheetName(displayNameMap.get(key) || key, usedNames);
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    });
+
+    // Source Register: built dynamically from whatever actually loaded, so
+    // record counts and "Last Updated" never drift out of sync the way a
+    // hardcoded table would once this list starts auto-refreshing.
+    const SOURCE_META = {
+      'UFLPA Entity List': { url: 'https://www.dhs.gov/uflpa-entity-list', warning: 'Scraped live from the DHS UFLPA Entity List page. Confirm against the official DHS page/Federal Register before compliance use.' },
+      'FCC Covered List': { url: 'https://www.fcc.gov/supplychain/coveredlist', warning: 'Scope review required under 47 CFR § 1.50002. NOTE: the FCC has also added several CATEGORICAL bans not tied to a named entity (e.g., routers/UAS components/power inverters produced in a foreign country). This name-matching tool CANNOT screen for those categorical/country-of-origin bans - review them separately at the source URL.' },
+      'EU Sanctioned Entities': { url: 'https://webgate.ec.europa.eu/fsd/fsf', warning: 'Full EU Financial Sanctions Files (FSF) consolidated list - "enterprise" (organization) records across every active EU sanctions regime. Does NOT cover EU sectoral/trade restrictions that apply by category rather than by named entity. Confirm entity type and current legal effect against the EU Sanctions Map before compliance use.' },
+      'OFAC SDN List': { url: 'https://sanctionslist.ofac.treas.gov/Home/SdnList', warning: "Specially Designated Nationals and Blocked Persons List, via trade.gov's Consolidated Screening List. Organization/entity records only. Confirm current status against OFAC before compliance use." },
+      'OFAC Sectoral Sanctions (SSI) List': { url: 'https://home.treasury.gov/policy-issues/financial-sanctions', warning: 'Activity-specific restrictions (e.g., debt/equity dealing limits), not a full blocking sanction - confirm which directive applies before compliance use.' },
+      'OFAC Non-SDN Chinese Military-Industrial Complex (CMIC) List': { url: 'https://home.treasury.gov/policy-issues/financial-sanctions', warning: 'Investment-ban list under EO 13959/14032 restricting U.S. investment in listed securities/derivatives.' },
+      'OFAC Non-SDN Menu-Based Sanctions List': { url: 'https://home.treasury.gov/policy-issues/financial-sanctions', warning: 'A selected "menu" of measures applies per entity, not a full blocking designation - confirm the specific measures against OFAC before compliance use.' },
+      'OFAC Capta List': { url: 'https://home.treasury.gov/policy-issues/financial-sanctions', warning: 'Correspondent/payable-through account restrictions only, not a full blocking sanction.' },
+    };
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const srData = orderedKeys.map(key => {
+      const meta = SOURCE_META[key] || { url: '', warning: 'Confirm current status against the official source before compliance use.' };
+      return {
+        'Source Name': key,
+        'Source URL': meta.url,
+        'Records': bySource.get(key).length,
+        'Last Updated': todayStr,
+        'Warning': meta.warning,
+      };
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(srData), sanitizeSheetName('Source Register', usedNames));
+
+    downloadWorkbook(wb, 'Company_Review_List_' + todayStr + '.xlsx');
+    showFlash('✓ Download started: Company_Review_List_' + todayStr + '.xlsx');
+  } catch(e) {
+    console.error(e);
+    showFlash('Download failed: ' + e.message);
+  }
+});
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+// Run button
+document.getElementById('run-btn').addEventListener('click', async () => {
+  if (!bomFiles.length) { showFlash('Please upload at least one BOM Excel file.'); return; }
+  if (!BUILT_IN_COMPANY_LIST.length) { showFlash('Company Review List has not loaded yet - see the note under "Company Review List" above.'); return; }
+
+  const runBtn = document.getElementById('run-btn');
+  runBtn.disabled = true;
+  document.getElementById('progress-wrap').style.display = 'block';
+  document.getElementById('results-section').classList.add('hidden');
+  document.getElementById('flash-area').innerHTML = '';
+
+  try {
+    setProgress(5, 'Loading built-in Company Review List…');
+    await new Promise(r => setTimeout(r, 0));
+    const companyRows = BUILT_IN_COMPANY_LIST;
+
+    // This tool always screens the single required column - no user selection.
+    const requestedFields = [REQUIRED_SCREENING_FIELD];
+
+    // Aggregated results across all BOMs
+    const agg = {
+      blockQueue: [],
+      likelyQueue: [],
+      allResults: [],
+      bomRowsAll: [],
+      perBomSummary: [],
+      statusCounts: {},
+      fieldWarnings: [],
+      missingColumnFiles: [],
+    };
+
+    // Loop over every uploaded BOM
+    for (let i = 0; i < bomFiles.length; i++) {
+      const file = bomFiles[i];
+      const pctBase = 10 + Math.round((i / bomFiles.length) * 85);
+      setProgress(pctBase, `Reading BOM ${i+1} of ${bomFiles.length}: ${file.name}`);
+      await new Promise(r => setTimeout(r, 30));
+
+      const bomRows = await readExcel(file);
+
+      setProgress(pctBase + 2, `Screening ${file.name}…`);
+      await new Promise(r => setTimeout(r, 30));
+
+      const r = await runScreening(bomRows, companyRows, requestedFields);
+
+      if (!r.selectedFields.length) {
+        agg.missingColumnFiles.push(file.name);
+      }
+
+      // Tag every output row with the source BOM filename
+      r.blockQueue.forEach(row => row['BOM File'] = file.name);
+      r.likelyQueue.forEach(row => row['BOM File'] = file.name);
+      r.allResults.forEach(row => row['BOM File'] = file.name);
+
+      // Aggregate
+      agg.blockQueue.push(...r.blockQueue);
+      agg.likelyQueue.push(...r.likelyQueue);
+      agg.allResults.push(...r.allResults);
+      r.bomRows.forEach(row => agg.bomRowsAll.push({ 'BOM File': file.name, ...row }));
+      agg.perBomSummary.push({ 'BOM File': file.name, ...r.summary });
+      for (const [k, v] of Object.entries(r.statusCounts)) {
+        agg.statusCounts[k] = (agg.statusCounts[k] || 0) + v;
+      }
+      agg.fieldWarnings.push(...r.fieldWarnings);
+    }
+
+    setProgress(98, 'Rendering combined results…');
+    await new Promise(r => setTimeout(r, 50));
+
+    // Build a combined "lastRunData" object for rendering + download
+    const totalBomRows = agg.bomRowsAll.length;
+    const aggregateSummary = {
+      'Run Date/Time': new Date().toISOString(),
+      'BOM Files': bomFiles.map(f => f.name).join('; '),
+      'BOM File Count': bomFiles.length,
+      'Total BOM Rows (all files)': totalBomRows,
+      'Total Screened Values': agg.allResults.length,
+      'Total Block / Escalate Items': agg.blockQueue.length,
+      'Total Likely Match Items': agg.likelyQueue.length,
+      'Tool Version': TOOL_VERSION,
+    };
+
+    lastRunData = {
+      summary: aggregateSummary,
+      perBomSummary: agg.perBomSummary,
+      blockQueue: agg.blockQueue,
+      likelyQueue: agg.likelyQueue,
+      allResults: agg.allResults,
+      bomRows: agg.bomRowsAll,
+      companyRows,
+      statusCounts: agg.statusCounts,
+    };
+
+    renderSummaryCards(agg.statusCounts, totalBomRows, agg.allResults.length);
+    renderTable('tbl-block', agg.blockQueue, REVIEW_COLS);
+    renderTable('tbl-likely', agg.likelyQueue, REVIEW_COLS);
+    renderTable('tbl-all', agg.allResults, ALL_COLS);
+
+    document.getElementById('pill-block').textContent = agg.blockQueue.length;
+    document.getElementById('pill-likely').textContent = agg.likelyQueue.length;
+    document.getElementById('pill-all').textContent = agg.allResults.length;
+
+    if (agg.fieldWarnings.length) {
+      showFlash([...new Set(agg.fieldWarnings)].join(' | '));
+    }
+
+    const errorBanner = document.getElementById('column-error-banner');
+    if (agg.missingColumnFiles.length) {
+      const list = agg.missingColumnFiles.map(n => `<li>${n}</li>`).join('');
+      errorBanner.innerHTML =
+        `<strong>ERROR: Missing "${REQUIRED_SCREENING_FIELD}" column.</strong> ` +
+        `The following file(s) do not contain a column with this exact heading and were NOT screened:` +
+        `<ul style="margin:8px 0 0 20px;">${list}</ul>` +
+        `Add a column named exactly "${REQUIRED_SCREENING_FIELD}" (see the reference BOM template) and re-upload.`;
+      errorBanner.style.display = 'block';
+    } else {
+      errorBanner.style.display = 'none';
+      errorBanner.innerHTML = '';
+    }
+
+    setProgress(100, `Done — screened ${bomFiles.length} BOM file${bomFiles.length>1?'s':''}.`);
+    document.getElementById('results-section').classList.remove('hidden');
+    document.getElementById('results-section').scrollIntoView({ behavior:'smooth', block:'start' });
+
+  } catch (err) {
+    showFlash('Error: ' + err.message);
+    console.error(err);
+  } finally {
+    runBtn.disabled = false;
+    setTimeout(() => { document.getElementById('progress-wrap').style.display = 'none'; }, 1200);
+  }
+});
+
+// Download button
+document.getElementById('download-btn').addEventListener('click', () => {
+  if (!lastRunData) return;
+  try { downloadExcel(lastRunData); }
+  catch(e) { showFlash('Export failed: ' + e.message); }
+});
+
+// ════════════════════════════════════════════
+// STARTUP CHECK — verify SheetJS loaded
+// ════════════════════════════════════════════
+window.addEventListener('load', () => {
+  if (typeof XLSX === 'undefined') {
+    showFlash('⚠ Excel library (SheetJS) could not be loaded from the CDN. Check your internet connection, then reload the page. Upload and download will not work until this is resolved.');
+  }
+});
+</script>
+</body>
+</html>
