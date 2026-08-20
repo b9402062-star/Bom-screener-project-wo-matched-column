@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BOM Restricted Party Screener v1.0.0</title>
+<title>BOM Restricted Party Screener (Full) v1.0.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -445,6 +445,8 @@ section.panel {
 .built-in-badge.fcc   { background: #1e3a5f44; color: #60a5fa; border: 1px solid #1e3a5f99; }
 .built-in-badge.eu    { background: #14532d33; color: #34d399; border: 1px solid #14532d66; }
 .built-in-badge.ofac  { background: #4c1d9522; color: #c4b5fd; border: 1px solid #4c1d9555; }
+.built-in-badge.bis   { background: #7c2d1222; color: #fdba74; border: 1px solid #7c2d1255; }
+.built-in-badge.dow   { background: #83184322; color: #f9a8d4; border: 1px solid #83184355; }
 .built-in-sub { font-size: 11px; color: var(--text2); margin-bottom: 14px; }
 .btn-download-list {
   display: inline-flex;
@@ -474,9 +476,9 @@ section.panel {
 
 <header>
   <div class="header-title">
-    <h1>BOM Restricted Party Screener</h1>
+    <h1>BOM Restricted Party Screener (Full)</h1>
   </div>
-  <div class="header-badge">v1.0.0 · Auto-refreshed data</div>
+  <div class="header-badge">v1.0.0 · 7-source coverage · Auto-refreshed data</div>
 </header>
 
 <main>
@@ -513,7 +515,10 @@ section.panel {
           Sources: <a href="https://www.dhs.gov/uflpa-entity-list" target="_blank">DHS UFLPA</a> ·
           <a href="https://www.fcc.gov/supplychain/coveredlist" target="_blank">FCC Covered List</a> ·
           <a href="https://data.europa.eu/apps/eusanctionstracker/entities/" target="_blank">EU Sanctions Tracker</a> ·
-          <a href="https://sanctionslist.ofac.treas.gov/Home/SdnList" target="_blank">OFAC Sanctions Lists</a>
+          <a href="https://sanctionslist.ofac.treas.gov/Home/SdnList" target="_blank">OFAC Sanctions Lists</a> ·
+          <a href="https://www.bis.gov/regulations/ear/744#supplement-4-744" target="_blank">BIS Restricted Party Lists</a> ·
+          <a href="https://www.federalregister.gov/documents/search?conditions%5Bterm%5D=Designation+of+Chinese+Military+Companies" target="_blank">DoW Section 1260H</a> ·
+          <a href="https://www.acquisition.gov/far/52.204-25" target="_blank">FAR 52.204-25 / DFARS 252.204-7018</a>
         </div>
       </div>
 
@@ -524,8 +529,7 @@ section.panel {
   <section class="panel">
     <div class="panel-title">02 Screening Fields</div>
     <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">
-      This tool screens the exact column heading <strong style="color:var(--accent);">"Manufacturer Name"</strong> only.
-      Every uploaded BOM must contain a column with this exact header.
+      This tool can only screen DoC-11317.
     </p>
     <a href="./reference/DOC-11317_rev2_Product_BOM.xlsx" download
        style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--accent2);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:8px 14px;background:var(--bg3);">
@@ -596,8 +600,11 @@ const REFRESH_LOG_URL = './data/refresh_log.json';
 const BADGE_GROUPS = [
   { match: s => s === 'UFLPA Entity List', label: 'UFLPA', cls: 'uflpa' },
   { match: s => s === 'FCC Covered List', label: 'FCC', cls: 'fcc' },
+  { match: s => s.startsWith('NDAA'), label: 'NDAA Sec. 889', cls: 'fcc' },
   { match: s => s === 'EU Sanctioned Entities', label: 'EU Sanctions', cls: 'eu' },
   { match: s => s.startsWith('OFAC'), label: 'OFAC', cls: 'ofac' },
+  { match: s => s.startsWith('BIS'), label: 'BIS', cls: 'bis' },
+  { match: s => s.startsWith('DoW'), label: 'DoW 1260H', cls: 'dow' },
 ];
 
 function renderCompanyListBadges(rows) {
@@ -1294,12 +1301,19 @@ document.getElementById('download-list-btn').addEventListener('click', () => {
     const SOURCE_LIST_SHEET_ORDER = [
       ['UFLPA Entity List', 'UFLPA Entity List'],
       ['FCC Covered List', 'FCC Covered List'],
+      ['NDAA Sec. 889 / FAR-DFARS Covered Telecom', 'NDAA Sec 889 Telecom'],
       ['EU Sanctioned Entities', 'EU Sanctioned Entities'],
       ['OFAC SDN List', 'OFAC SDN List'],
       ['OFAC Sectoral Sanctions (SSI) List', 'OFAC SSI List'],
       ['OFAC Non-SDN Chinese Military-Industrial Complex (CMIC) List', 'OFAC CMIC List'],
       ['OFAC Non-SDN Menu-Based Sanctions List', 'OFAC Menu-Based Sanctions'],
+      ['OFAC Palestinian Legislative Council List', 'OFAC PLC List'],
       ['OFAC Capta List', 'OFAC Capta List'],
+      ['BIS Entity List', 'BIS Entity List'],
+      ['BIS Denied Persons List', 'BIS Denied Persons List'],
+      ['BIS Unverified List', 'BIS Unverified List'],
+      ['BIS Military End User (MEU) List', 'BIS MEU List'],
+      ['DoW Section 1260H List (Chinese Military Companies)', 'DoW 1260H List'],
     ];
 
     function sanitizeSheetName(name, usedNames) {
@@ -1345,12 +1359,19 @@ document.getElementById('download-list-btn').addEventListener('click', () => {
     const SOURCE_META = {
       'UFLPA Entity List': { url: 'https://www.dhs.gov/uflpa-entity-list', warning: 'Scraped live from the DHS UFLPA Entity List page. Confirm against the official DHS page/Federal Register before compliance use.' },
       'FCC Covered List': { url: 'https://www.fcc.gov/supplychain/coveredlist', warning: 'Scope review required under 47 CFR § 1.50002. NOTE: the FCC has also added several CATEGORICAL bans not tied to a named entity (e.g., routers/UAS components/power inverters produced in a foreign country). This name-matching tool CANNOT screen for those categorical/country-of-origin bans - review them separately at the source URL.' },
+      'NDAA Sec. 889 / FAR-DFARS Covered Telecom': { url: 'https://www.acquisition.gov/far/52.204-25', warning: 'The 5 named entities (Huawei, ZTE, Hytera, Hikvision, Dahua) whose covered telecom/surveillance equipment is banned government-wide under FAR 52.204-25 / DFARS 252.204-7018/7020 - same companies as the FCC Covered List but listed separately for FAR/DFARS-clause citation. Does NOT cover NDAA Sec. 5949 (FY2023), a country-of-origin (not named-entity) semiconductor procurement ban this tool cannot screen for.' },
       'EU Sanctioned Entities': { url: 'https://webgate.ec.europa.eu/fsd/fsf', warning: 'Full EU Financial Sanctions Files (FSF) consolidated list - "enterprise" (organization) records across every active EU sanctions regime. Does NOT cover EU sectoral/trade restrictions that apply by category rather than by named entity. Confirm entity type and current legal effect against the EU Sanctions Map before compliance use.' },
       'OFAC SDN List': { url: 'https://sanctionslist.ofac.treas.gov/Home/SdnList', warning: "Specially Designated Nationals and Blocked Persons List, via trade.gov's Consolidated Screening List. Organization/entity records only. Confirm current status against OFAC before compliance use." },
       'OFAC Sectoral Sanctions (SSI) List': { url: 'https://home.treasury.gov/policy-issues/financial-sanctions', warning: 'Activity-specific restrictions (e.g., debt/equity dealing limits), not a full blocking sanction - confirm which directive applies before compliance use.' },
-      'OFAC Non-SDN Chinese Military-Industrial Complex (CMIC) List': { url: 'https://home.treasury.gov/policy-issues/financial-sanctions', warning: 'Investment-ban list under EO 13959/14032 restricting U.S. investment in listed securities/derivatives.' },
+      'OFAC Non-SDN Chinese Military-Industrial Complex (CMIC) List': { url: 'https://home.treasury.gov/policy-issues/financial-sanctions', warning: 'Investment-ban list under EO 13959/14032 restricting U.S. investment in listed securities/derivatives. Overlaps with, but is legally distinct from, the DoW Section 1260H list below.' },
       'OFAC Non-SDN Menu-Based Sanctions List': { url: 'https://home.treasury.gov/policy-issues/financial-sanctions', warning: 'A selected "menu" of measures applies per entity, not a full blocking designation - confirm the specific measures against OFAC before compliance use.' },
+      'OFAC Palestinian Legislative Council List': { url: 'https://home.treasury.gov/policy-issues/financial-sanctions', warning: 'Confirm current status against OFAC before compliance use.' },
       'OFAC Capta List': { url: 'https://home.treasury.gov/policy-issues/financial-sanctions', warning: 'Correspondent/payable-through account restrictions only, not a full blocking sanction.' },
+      'BIS Entity List': { url: 'https://www.bis.gov/regulations/ear/744#supplement-4-744', warning: 'Presence triggers an EAR license requirement (often with a policy of denial) supplemental to other EAR requirements. Confirm current terms against bis.gov before compliance use.' },
+      'BIS Denied Persons List': { url: 'https://www.bis.gov/licensing/end-user-guidance/denied-persons-list-dpl', warning: 'Denial orders generally deny all export privileges. Orders whose end date has already passed are excluded (only currently-active orders are included). Confirm current order terms and expiration against bis.gov before compliance use.' },
+      'BIS Unverified List': { url: 'https://www.bis.gov/entity-list', warning: "A 'Red Flag' BIS could not resolve in a prior transaction - not a per-se export prohibition, but the flag must be resolved (e.g., via a UVL statement) before proceeding." },
+      'BIS Military End User (MEU) List': { url: 'https://www.bis.gov/regulations/ear/744#supplement-4-744', warning: 'Triggers an EAR license requirement for items subject to the EAR destined to that end user.' },
+      'DoW Section 1260H List (Chinese Military Companies)': { url: 'https://www.federalregister.gov/documents/search?conditions%5Bterm%5D=Designation+of+Chinese+Military+Companies', warning: "Reflects the Department of War's latest Section 1260H update, tracked via delta updates from the Federal Register. NOT a blocking sanction - triggers DoW procurement restrictions (phased through 2027), a DoW-contract AI-use ban, and related BIOSECURE/hardware-procurement restrictions, and is a red flag for EAR military end-user status." },
     };
     const todayStr = new Date().toISOString().slice(0, 10);
     const srData = orderedKeys.map(key => {
