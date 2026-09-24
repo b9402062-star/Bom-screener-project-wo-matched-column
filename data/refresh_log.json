@@ -1,10 +1,10 @@
 {
-  "run_started": "2026-09-23T11:20:21Z",
+  "run_started": "2026-09-24T11:33:08Z",
   "info": [
     "FCC Covered List: OK (11 rows)",
     "NDAA Sec. 889 / FAR-DFARS Covered Telecom: OK (5 rows)",
     "EU Sanctioned Entities: OK (1776 rows)",
-    "OFAC SDN List: OK (9965 rows)",
+    "OFAC SDN List: OK (9964 rows)",
     "OFAC Sectoral Sanctions (SSI) List: OK (286 rows)",
     "OFAC Non-SDN Menu-Based Sanctions List: OK (11 rows)",
     "OFAC Non-SDN Chinese Military-Industrial Complex (CMIC) List: OK (68 rows)",
@@ -20,6 +20,6 @@
     "UFLPA Entity List: fetch/parse FAILED (HTTP Error 403: Forbidden); kept 205 rows from previous run."
   ],
   "errors": [],
-  "run_finished": "2026-09-23T11:20:58Z",
-  "total_rows": 15419
+  "run_finished": "2026-09-24T11:34:28Z",
+  "total_rows": 15418
 }
