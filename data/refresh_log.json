@@ -1,5 +1,5 @@
 {
-  "run_started": "2026-09-27T11:52:06Z",
+  "run_started": "2026-09-28T13:37:52Z",
   "info": [
     "FCC Covered List: OK (11 rows)",
     "NDAA Sec. 889 / FAR-DFARS Covered Telecom: OK (5 rows)",
@@ -20,6 +20,6 @@
     "UFLPA Entity List: fetch/parse FAILED (HTTP Error 403: Forbidden); kept 205 rows from previous run."
   ],
   "errors": [],
-  "run_finished": "2026-09-27T11:52:29Z",
+  "run_finished": "2026-09-28T13:38:24Z",
   "total_rows": 15418
 }
