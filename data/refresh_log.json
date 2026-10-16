@@ -1,9 +1,10 @@
 {
-  "run_started": "2026-10-15T11:16:32Z",
+  "run_started": "2026-10-16T11:11:03Z",
   "info": [
     "FCC Covered List: OK (11 rows)",
     "NDAA Sec. 889 / FAR-DFARS Covered Telecom: OK (5 rows)",
-    "OFAC SDN List: OK (10018 rows)",
+    "EU Sanctioned Entities: OK (1775 rows)",
+    "OFAC SDN List: OK (10029 rows)",
     "OFAC Sectoral Sanctions (SSI) List: OK (286 rows)",
     "OFAC Non-SDN Menu-Based Sanctions List: OK (11 rows)",
     "OFAC Non-SDN Chinese Military-Industrial Complex (CMIC) List: OK (68 rows)",
@@ -16,10 +17,9 @@
     "DoW 1260H: no newer notice than 2026-11571; baseline unchanged."
   ],
   "warnings": [
-    "UFLPA Entity List: fetch/parse FAILED (HTTP Error 403: Forbidden); kept 205 rows from previous run.",
-    "EU Sanctioned Entities: fetch/parse FAILED (HTTP Error 500: Internal Server Error); kept 1774 rows from previous run."
+    "UFLPA Entity List: fetch/parse FAILED (HTTP Error 403: Forbidden); kept 205 rows from previous run."
   ],
   "errors": [],
-  "run_finished": "2026-10-15T11:18:31Z",
-  "total_rows": 15469
+  "run_finished": "2026-10-16T11:11:26Z",
+  "total_rows": 15481
 }
