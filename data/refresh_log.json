@@ -1,8 +1,9 @@
 {
-  "run_started": "2026-10-29T12:46:57Z",
+  "run_started": "2026-10-30T12:38:44Z",
   "info": [
     "FCC Covered List: OK (11 rows)",
     "NDAA Sec. 889 / FAR-DFARS Covered Telecom: OK (5 rows)",
+    "EU Sanctioned Entities: OK (1779 rows)",
     "OFAC SDN List: OK (10034 rows)",
     "OFAC Sectoral Sanctions (SSI) List: OK (286 rows)",
     "OFAC Non-SDN Menu-Based Sanctions List: OK (16 rows)",
@@ -16,10 +17,9 @@
     "DoW 1260H: no newer notice than 2026-11571; baseline unchanged."
   ],
   "warnings": [
-    "UFLPA Entity List: fetch/parse FAILED (HTTP Error 403: Forbidden); kept 205 rows from previous run.",
-    "EU Sanctioned Entities: fetch/parse FAILED (Remote end closed connection without response); kept 1779 rows from previous run."
+    "UFLPA Entity List: fetch/parse FAILED (HTTP Error 403: Forbidden); kept 205 rows from previous run."
   ],
   "errors": [],
-  "run_finished": "2026-10-29T12:47:04Z",
+  "run_finished": "2026-10-30T12:39:11Z",
   "total_rows": 15481
 }
