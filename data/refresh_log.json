@@ -1,17 +1,17 @@
 {
-  "run_started": "2026-11-04T14:15:19Z",
+  "run_started": "2026-11-05T14:28:21Z",
   "info": [
     "FCC Covered List: OK (11 rows)",
     "NDAA Sec. 889 / FAR-DFARS Covered Telecom: OK (5 rows)",
     "EU Sanctioned Entities: OK (1779 rows)",
-    "OFAC SDN List: OK (10034 rows)",
+    "OFAC SDN List: OK (10044 rows)",
     "OFAC Sectoral Sanctions (SSI) List: OK (286 rows)",
     "OFAC Non-SDN Menu-Based Sanctions List: OK (16 rows)",
     "OFAC Non-SDN Chinese Military-Industrial Complex (CMIC) List: OK (68 rows)",
     "OFAC Palestinian Legislative Council List: OK (0 rows)",
     "OFAC Capta List: OK (1 rows)",
     "BIS Entity List: OK (2598 rows)",
-    "BIS Denied Persons List: OK (43 rows)",
+    "BIS Denied Persons List: OK (42 rows)",
     "BIS Unverified List: OK (179 rows)",
     "BIS Military End User (MEU) List: OK (70 rows)",
     "DoW 1260H: no newer notice than 2026-11571; baseline unchanged."
@@ -20,6 +20,6 @@
     "UFLPA Entity List: fetch/parse FAILED (HTTP Error 403: Forbidden); kept 205 rows from previous run."
   ],
   "errors": [],
-  "run_finished": "2026-11-04T14:16:18Z",
-  "total_rows": 15481
+  "run_finished": "2026-11-05T14:29:01Z",
+  "total_rows": 15490
 }
