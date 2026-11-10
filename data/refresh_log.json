@@ -1,5 +1,5 @@
 {
-  "run_started": "2026-11-09T15:56:41Z",
+  "run_started": "2026-11-10T14:43:49Z",
   "info": [
     "FCC Covered List: OK (11 rows)",
     "NDAA Sec. 889 / FAR-DFARS Covered Telecom: OK (5 rows)",
@@ -13,13 +13,13 @@
     "BIS Entity List: OK (2598 rows)",
     "BIS Denied Persons List: OK (42 rows)",
     "BIS Unverified List: OK (179 rows)",
-    "BIS Military End User (MEU) List: OK (70 rows)",
-    "DoW 1260H: no newer notice than 2026-11571; baseline unchanged."
+    "BIS Military End User (MEU) List: OK (70 rows)"
   ],
   "warnings": [
-    "UFLPA Entity List: fetch/parse FAILED (HTTP Error 403: Forbidden); kept 205 rows from previous run."
+    "UFLPA Entity List: fetch/parse FAILED (HTTP Error 403: Forbidden); kept 205 rows from previous run.",
+    "DoW 1260H: found newer notice 2026-22840 but could not confidently parse its entity list - leaving prior baseline of 186 entities unchanged. Please check https://www.federalregister.gov/documents/2026/11/10/2026-22840/notice-of-removal-of-designated-chinese-military-company manually."
   ],
   "errors": [],
-  "run_finished": "2026-11-09T15:59:00Z",
+  "run_finished": "2026-11-10T14:46:21Z",
   "total_rows": 15545
 }
