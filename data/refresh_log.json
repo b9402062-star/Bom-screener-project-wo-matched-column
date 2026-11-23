@@ -1,5 +1,5 @@
 {
-  "run_started": "2026-11-22T14:26:20Z",
+  "run_started": "2026-11-23T17:54:03Z",
   "info": [
     "UFLPA Entity List: OK (210 rows)",
     "FCC Covered List: OK (11 rows)",
@@ -20,6 +20,6 @@
     "DoW 1260H: found newer notice 2026-22840 but could not confidently parse its entity list - leaving prior baseline of 186 entities unchanged. Please check https://www.federalregister.gov/documents/2026/11/10/2026-22840/notice-of-removal-of-designated-chinese-military-company manually."
   ],
   "errors": [],
-  "run_finished": "2026-11-22T14:26:46Z",
+  "run_finished": "2026-11-23T17:54:41Z",
   "total_rows": 15580
 }
